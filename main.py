@@ -1,5 +1,6 @@
 import discord
 import pickle
+import asyncio
 
 from guild import Guild_Manager
 from reminder import Reminder
@@ -10,11 +11,12 @@ from discordtoken import token
 
 # add by going to https://discord.com/oauth2/authorize?scope=bot&permissions=0&client_id=792429161301671996
 
-## settings
+# settings
 
 settings = {
     "permissioninteger": 68672,
-    "commandprefix": "$"
+    "commandprefix": "*",
+    "reminder_check_interval": 5
 }
 
 # constants
@@ -25,16 +27,17 @@ Those reminders need to be created by Admins.
 
  
 ***[User]***
-***$reminderlist*** -> shows you all timers present on this server
-***$follow [timer_name]*** -> 
-***$unfollow [timer]*** ->
+***$listreminders*** -> shows you all timers present on this server
+***$follow [reminder_name]*** -> 
+***$unfollow [reminder]*** ->
+**$listsubscribers [reminder] ->
 
 
 ***[Admin]***
 ***$createreminder [name] [time] [massage]***
 will remind all players which followed this reminder to send [message] if it hasn't been sent in [time] in the channel where this command was sent. 
 
-The time can for example be: 1m (minimum) | 1.6h | 2d | 1w
+The time can for example be: 1m (minimum) | 1h | 2d | 1w
 As an example: $createreminder 2h !d bump
 
 ***$deletereminder [name]***
@@ -42,24 +45,25 @@ will delete a reminder
 you can add ***publish*** at the end to inform all users who followed this reminder that the reminder is no longer active.
 """
 
-client = discord.Client()
 
+class ReminderBot(discord.Client):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-class ReminderBot:
-    def __init__(self, token):
-        self.token = token
         self.savefile = "reminderbot.save"
-        self.guilds = Guild_Manager()
+        self.guild_manager = Guild_Manager()
+
+        self.bg_task = self.loop.create_task(self.checkreminders())
 
     def load_save(self):
         with open(self.savefile, "rb") as f:
-            self.guilds = pickle.load(f)
+            self.guild_manager = pickle.load(f)
 
     def save_guilds(self):
         with open(self.savefile, "wb") as f:
-            pickle.dump(self.guilds, f)
+            pickle.dump(self.guild_manager, f)
 
-    def start(self, savefile=None):
+    def setup(self, savefile=None):
         if savefile is not None:
             self.savefile = savefile
         try:
@@ -68,29 +72,60 @@ class ReminderBot:
         except:
             print("Couldn't find a previous save. Creating a new instead")
 
-            self.guilds = Guild_Manager()
+            self.guild_manager = Guild_Manager()
             try:
                 self.save_guilds()
             except:
                 print("Error! Could not create a savefile")
                 return
 
-        client.run(self.token)
+    async def checkreminders(self):
+        await self.wait_until_ready()
+        guild = None
+        reminder = None
+        while not self.is_closed():
+            reminder = None
+            for guild_id in self.guild_manager.guilds:
+                guild = self.guild_manager.guilds[guild_id]
+                print(f'Checking Reminder for Guild [{self.get_guild(guild.guildid).name}]')
+                for reminder_name in guild.reminders:
+                    reminder = guild.get_reminder(reminder_name)
+                    print(f'status of [{reminder_name}]: ', end="")
+                    if reminder.is_it_time_to_remind():
+                        print('crying :\'(')
+                        # await self.get_guild(guild_id).get_channel(reminder.channelid)
+                        message = f'**{reminder_name}** IT\'S TIME'
+                        if len(reminder.subscribers) != 0:
+                            message += " ("
+                            for userid in reminder.subscribers:
+                                message += f'{self.get_user(userid).mention} '
+                            message += ")"
+                        await self.get_channel(reminder.channelid).send(message)
+                        print()
+                        reminder.set_reminded()
+                    else:
+                        print('fine :)')
+                print()
+
+            if reminder is not None:
+                print()
+
+            await asyncio.sleep(settings['reminder_check_interval'])
 
     async def on_ready(self):
-        print('We have logged in as {0.user}\n'.format(client))
+        print('We have logged in as {0.user}\n'.format(self))
 
     async def on_message(self, message):
-        if message.author == client.user:
+        if message.author == self.user:
             return
 
         textmessage = message.content
 
-        guild = self.guilds.get_guild(message.guild.id)
+        guild = self.guild_manager.get_guild(message.guild.id)
         if guild is None:
-            self.guilds.add_guild(message.guild.id)
+            self.guild_manager.add_guild(message.guild.id)
 
-            guild = self.guilds.get_guild(message.guild.id)
+            guild = self.guild_manager.get_guild(message.guild.id)
             print(f'added Guild {message.guild.id}')
 
         # filter for commands
@@ -99,11 +134,15 @@ class ReminderBot:
             if command[0] == "help":
                 await message.channel.send(helpmessage)
 
+
             # createreminder
             elif command[0] == "createreminder" and len(command) >= 4:
-                if guild.add_reminder(Reminder(command[1], command[2], command[3], message.channel.id)):
+                listencommand = " ".join(command[3:])
+                if guild.add_reminder(Reminder(command[1], command[2], listencommand, message.channel.id)):
+                    guild.get_reminder(command[1]).add_subscriber(message.author.id)
                     self.save_guilds()
-                    await message.add_reaction('✅')
+                    await message.channel.send(
+                        f'Created reminder called **{command[1]}** for **{listencommand}** in channel **{message.channel.name}** every **{command[2]}**!')
                 else:
                     await message.add_reaction('❌')
 
@@ -122,11 +161,29 @@ class ReminderBot:
                     await message.add_reaction('❌')
 
             # reminderlist
-            elif command[0] == "reminderlist" and len(command) == 1:
-                response = "***Reminders of this Server:***\n"
-                for reminder_name in guild.reminders:
-                    response += f'\n{reminder_name}'
+            elif command[0] == "listreminders" and len(command) == 1:
+                response = ""
+                if len(guild.reminders) == 0:
+                    response = "***Reminders of this Server:***\n\n no reminders yet"
+                else:
+                    response = "***Reminders of this Server:***\n"
+                    for reminder_name in guild.reminders:
+                        response += f'\n{reminder_name}'
                 await message.channel.send(response)
+
+            # listsubscribers
+            elif command[0] == "listsubscribers" and len(command) == 2:
+                reminder = guild.get_reminder(command[1])
+                if reminder is None:
+                    await message.channel.send(f'invalid name {command[1]}')
+                else:
+                    response = f'**Subscribers of {command[1]}**\n'
+
+                    for subscriber_id in reminder.subscribers:
+                        response += f'\n{subscriber_id} aka {self.get_user(subscriber_id).name}'
+
+                    await message.channel.send(response)
+
 
             # follow
             elif command[0] == "follow" and len(command) == 2:
@@ -153,37 +210,17 @@ class ReminderBot:
 
     async def on_guild_join(self, guild):
         print("Oh yummy a new Server")
-        self.guilds.add_guild(guild.id)
+        self.guild_manager.add_guild(guild.id)
         self.save_guilds()
 
     async def on_guild_remove(self, guild):
         print("Oh no...")
-        self.guilds.remove_guild(guild.id)
+        self.guild_manager.remove_guild(guild.id)
         self.save_guilds()
         print("Anyway")
 
 
-reminderbot = ReminderBot(token)
+reminderbot = ReminderBot()
 
-
-@client.event
-async def on_ready():
-    await reminderbot.on_ready()
-
-
-@client.event
-async def on_message(message):
-    await reminderbot.on_message(message)
-
-
-@client.event
-async def on_guild_join(guild):
-    await reminderbot.on_guild_join(guild)
-
-
-@client.event
-async def on_guild_remove(guild):
-    await reminderbot.on_guild_remove(guild)
-
-
-reminderbot.start()
+reminderbot.setup()
+reminderbot.run(token)
