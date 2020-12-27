@@ -1,11 +1,31 @@
 import time
 
 
+def stringtime_to_seconds(stringtime):
+    unknownunittime = int(stringtime[:-1])
+    unit = stringtime[-1].lower()
+
+    if unit == 'm':
+        unknownunittime *= 60
+    elif unit == 'h':
+        unknownunittime *= 3600
+    elif unit == 's':
+        unknownunittime *= 3600
+    elif unit == 'd':
+        unknownunittime *= 86400
+    elif unit == 't':
+        unknownunittime *= 86400
+    else:
+        unknownunittime = -1
+
+    return unknownunittime
+
+
 class Reminder:
     def __init__(self, name, interval, message, channelid):
         self.name = name
         self.message = message
-        self.interval = 10  # TODO interval
+        self.interval = stringtime_to_seconds(interval)
         self.channelid = channelid
 
         self.nexttime = time.time() + self.interval
@@ -13,7 +33,7 @@ class Reminder:
         self.is_reminded = False
 
     def add_subscriber(self, user_id):
-        if not user_id in self.subscribers:
+        if user_id not in self.subscribers:
             self.subscribers.append(user_id)
 
     def remove_subscriber(self, user_id):
