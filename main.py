@@ -1,6 +1,7 @@
 import discord
 import pickle
 import asyncio
+import re
 
 from guild import Guild_Manager
 from reminder import Reminder
@@ -51,6 +52,8 @@ class ReminderBot(discord.Client):
         super().__init__(*args, **kwargs)
 
         self.savefile = "reminderbot.save"
+
+        self.timepattern = re.compile("\\d+[mMhHsSdDtT]")
         self.guild_manager = Guild_Manager()
 
         self.bg_task = self.loop.create_task(self.checkreminders())
@@ -141,14 +144,24 @@ class ReminderBot(discord.Client):
 
             # createreminder
             elif command[0] == "createreminder" and len(command) >= 4:
-                listencommand = " ".join(command[3:])
-                if guild.add_reminder(Reminder(command[1], command[2], listencommand, message.channel.id)):
-                    guild.get_reminder(command[1]).add_subscriber(message.author.id)
-                    self.save_guilds()
-                    await message.channel.send(
-                        f'Created reminder called **{command[1]}** for **{listencommand}** in channel **{message.channel.name}** every **{command[2]}**!')
+                searchresult = self.timepattern.search(command[2])
+
+                if searchresult is None:
+                    await message.channel.send(f'Invalid time pattern!')
                 else:
-                    await message.add_reaction('❌')
+                    timestring = command[2][searchresult.start():searchresult.end()]
+                    listencommand = " ".join(command[3:])
+
+                    reminder = Reminder(command[1], timestring, listencommand, message.channel.id)
+
+                    if guild.add_reminder(reminder):
+                        guild.get_reminder(command[1]).add_subscriber(message.author.id)
+                        self.save_guilds()
+                        await message.channel.send(
+                            f'Created reminder called **{command[1]}** for **{listencommand}** in channel **{message.channel.name}** every **{command[2]}**!')
+                    else:
+                        await message.add_reaction('❌')
+
 
             # deletereminder
             elif command[0] == "deletereminder" and (len(command) == 2 or len(command) == 3):
