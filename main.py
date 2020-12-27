@@ -160,15 +160,13 @@ class ReminderBot(discord.Client):
                 else:
                     await message.add_reaction('❌')
 
-            # reminderlist
+            # listreminders
             elif command[0] == "listreminders" and len(command) == 1:
                 response = ""
                 if len(guild.reminders) == 0:
                     response = "***Reminders of this Server:***\n\n no reminders yet"
                 else:
-                    response = "***Reminders of this Server:***\n"
-                    for reminder_name in guild.reminders:
-                        response += f'\n{reminder_name}'
+                    response = "***Reminders of this Server:***\n\n" + "\n".join(guild.reminders)
                 await message.channel.send(response)
 
             # listsubscribers
