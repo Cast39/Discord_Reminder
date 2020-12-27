@@ -36,7 +36,7 @@ class Guild:
     def check_for_reminder_updates(self, message):
         for reminder_name in self.reminders:
             reminder = self.get_reminder(reminder_name)
-            if reminder.message == message:
+            if reminder.message == message.content and message.channel.id == reminder.channelid:
                 reminder.update_next_time()
 
     def get_reminder(self, reminder_name):
