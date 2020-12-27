@@ -30,5 +30,8 @@ class Reminder:
     def set_reminded(self):
         self.is_reminded = True
 
+    def get_reminded(self):
+        return self.is_reminded
+
     def is_it_time_to_remind(self):
-        return self.nexttime <= time.time() and not self.is_reminded
+        return self.nexttime <= time.time()

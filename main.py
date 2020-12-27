@@ -92,17 +92,21 @@ class ReminderBot(discord.Client):
                     reminder = guild.get_reminder(reminder_name)
                     print(f'status of [{reminder_name}]: ', end="")
                     if reminder.is_it_time_to_remind():
-                        print('crying :\'(')
-                        # await self.get_guild(guild_id).get_channel(reminder.channelid)
-                        message = f'**{reminder_name}** IT\'S TIME'
-                        if len(reminder.subscribers) != 0:
-                            message += " ("
-                            for userid in reminder.subscribers:
-                                message += f'{self.get_user(userid).mention} '
-                            message += ")"
-                        await self.get_channel(reminder.channelid).send(message)
-                        print()
-                        reminder.set_reminded()
+                        if reminder.get_reminded():
+                            print('crying quiet :(')
+                        else:
+                            print('crying :\'(')
+
+                            message = f'**{reminder_name}** IT\'S TIME'
+                            if len(reminder.subscribers) != 0:
+                                message += " ("
+                                for userid in reminder.subscribers:
+                                    message += f'{self.get_user(userid).mention} '
+                                message += ")"
+                            await self.get_channel(reminder.channelid).send(message)
+                            reminder.set_reminded()
+                            print()
+
                     else:
                         print('fine :)')
                 print()
