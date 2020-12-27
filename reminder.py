@@ -2,13 +2,15 @@ import time
 
 
 class Reminder:
-    def __init__(self, name, message, interval, channel, starttime=0):
+    def __init__(self, name, message, interval, channelid):
         self.name = name
         self.message = message
-        self.interval = interval
-        self.channel = channel
-        self.lasttime = starttime
+        self.interval = 10  # TODO interval
+        self.channelid = channelid
+
+        self.nexttime = time.time() + self.interval
         self.subscribers = []
+        self.is_reminded = False
 
     def add_subscriber(self, user_id):
         if not user_id in self.subscribers:
@@ -21,8 +23,12 @@ class Reminder:
     def is_subscriber(self, user_id):
         return user_id in self.subscribers
 
-    def update_last_time(self):
-        self.lasttime = time.time()
+    def update_next_time(self):
+        self.nexttime = time.time() + self.interval
+        self.is_reminded = False
+
+    def set_reminded(self):
+        self.is_reminded = True
 
     def is_it_time_to_remind(self):
-        return self.lasttime + self.interval >= time.time()
+        return self.nexttime <= time.time() and not self.is_reminded
