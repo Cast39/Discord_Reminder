@@ -27,21 +27,21 @@ all users can follow reminders. These reminders will remind you to send specific
 Those reminders need to be created by Admins.
 
  
-***[User]***
+**[User]**
 ***$listreminders*** -> shows you all timers present on this server
 ***$follow [reminder_name]*** -> 
 ***$unfollow [reminder]*** ->
-**$listsubscribers [reminder]** ->
+***$listsubscribers [reminder]*** ->
 
 
-***[Admin]***
-**$createreminder [name] [time] [massage]**
+**[Admin]**
+***$createreminder [name] [time] [massage]***
 will remind all players which followed this reminder to send [message] if it hasn't been sent in [time] in the channel where this command was sent. 
 
 The time can for example be: 1m (minimum) | 1h | 2d | 1w
 As an example: $createreminder 2h !d bump
 
-**$deletereminder [name]**
+***$deletereminder [name]***
 will delete a reminder
 you can add ***publish*** at the end to inform all users who followed this reminder that the reminder is no longer active.
 """
