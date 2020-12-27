@@ -17,7 +17,7 @@ from discordtoken import token
 settings = {
     "permissioninteger": 68672,
     "commandprefix": "*",
-    "reminder_check_interval": 3
+    "reminder_check_interval": 15
 }
 
 # constants
@@ -140,7 +140,6 @@ class ReminderBot(discord.Client):
             command = textmessage[len(settings['commandprefix']):].split(" ")
             if command[0] == "help":
                 await message.channel.send(helpmessage)
-
 
             # createreminder
             elif command[0] == "createreminder" and len(command) >= 4:
