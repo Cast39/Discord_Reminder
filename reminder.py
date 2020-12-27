@@ -2,7 +2,7 @@ import time
 
 
 class Reminder:
-    def __init__(self, name, message, interval, channelid):
+    def __init__(self, name, interval, message, channelid):
         self.name = name
         self.message = message
         self.interval = 10  # TODO interval
