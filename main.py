@@ -209,6 +209,8 @@ class ReminderBot(discord.Client):
 
             else:
                 await message.add_reaction('❌')
+        else:
+            guild.check_for_reminder_updates(textmessage)
 
     async def on_guild_join(self, guild):
         print("Oh yummy a new Server")
