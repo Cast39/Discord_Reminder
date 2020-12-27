@@ -4,6 +4,10 @@ import pickle
 from guild import Guild_Manager
 from reminder import Reminder
 
+# you need to create a file called "discordtoken.py" with one line:
+# token = [Discord Bot Token]
+from discordtoken import token
+
 # add by going to https://discord.com/oauth2/authorize?scope=bot&permissions=0&client_id=792429161301671996
 
 ## settings
@@ -159,7 +163,7 @@ class ReminderBot:
         print("Anyway")
 
 
-reminderbot = ReminderBot('NzkyNDI5MTYxMzAxNjcxOTk2.X-dlKg.xBbtOcCbacL5GM9kYJ5UV_4Q_fA')
+reminderbot = ReminderBot(token)
 
 
 @client.event
