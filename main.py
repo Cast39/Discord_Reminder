@@ -20,31 +20,32 @@ settings = {
     "reminder_check_interval": 15
 }
 
+
 # constants
-helpmessage = """***How to use me:***
-
-all users can follow reminders. These reminders will remind you to send specific messages.
-Those reminders need to be created by Admins.
-
- 
-**[User]**
-***$listreminders*** -> shows you all timers present on this server
-***$follow [reminder_name]*** -> 
-***$unfollow [reminder]*** ->
-***$listsubscribers [reminder]*** ->
-
-
-**[Admin]**
-***$createreminder [name] [time] [massage]***
-will remind all players which followed this reminder to send [message] if it hasn't been sent in [time] in the channel where this command was sent. 
-
-The time can for example be: 1m (minimum) | 1h | 2d | 1w
-As an example: $createreminder 2h !d bump
-
-***$deletereminder [name]***
-will delete a reminder
-you can add ***publish*** at the end to inform all users who followed this reminder that the reminder is no longer active.
-"""
+helpmessage = f'**How to use me:**\n\
+\n\
+all users can follow reminders. These reminders will remind you to send specific messages.\n\
+Those reminders need to be created by Admins.\n\
+\n\
+\n\
+__[User]__\n\
+**\\{settings["commandprefix"]}listreminders** -> shows you all timers present on this server\n\
+**\\{settings["commandprefix"]}follow [reminder_name]** -> \n\
+**\\{settings["commandprefix"]}unfollow [reminder]** ->\n\
+**\\{settings["commandprefix"]}listsubscribers [reminder]** ->\n\
+\n\
+\n\
+__[Admin]__\n\
+**\\{settings["commandprefix"]}createreminder [name] [time] [massage]**\n\
+will remind all players which followed this reminder to send [message] if it hasn\'t been sent in [time] in the channel where this command was sent. \n\
+\n\
+The time can for example be: 1m (minimum) | 1h | 2d | 1w\n\
+As an example: {settings["commandprefix"]}createreminder 2h !d bump\n\
+\n\
+**\\{settings["commandprefix"]}deletereminder [name]**\n\
+will delete a reminder\n\
+you can add *publish* at the end to inform all users who followed this reminder that the reminder is no longer active.\n\
+'
 
 
 class ReminderBot(discord.Client):
@@ -194,7 +195,7 @@ class ReminderBot(discord.Client):
                     response = f'**Subscribers of {command[1]}**\n'
 
                     for subscriber_id in reminder.subscribers:
-                        response += f'\n{subscriber_id} aka {self.get_user(subscriber_id).name}'
+                        response += f'\n{self.get_user(subscriber_id).name}'
 
                     await message.channel.send(response)
 
@@ -219,8 +220,6 @@ class ReminderBot(discord.Client):
                     self.save_guilds()
                     await message.add_reaction('✅')
 
-            else:
-                await message.add_reaction('❌')
         else:
             if guild.check_for_reminder_updates(message):
                 await message.add_reaction('✅')
