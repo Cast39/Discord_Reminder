@@ -105,7 +105,12 @@ class ReminderBot(discord.Client):
                             if len(reminder.subscribers) != 0:
                                 message += " ("
                                 for userid in reminder.subscribers:
-                                    message += f'{self.get_user(userid).mention} '
+                                    user = self.get_user(userid)
+                                    #print(f'{user}\n{dir(user)}\n{type(user)}')
+                                    if user is None:
+                                    #    print(f'THE ANOMALY: USER {userid} IS NOT IN THE DATABASE')
+                                    else:
+                                        message += f'{user.mention} '
                                 message += ")"
                             await self.get_channel(reminder.channelid).send(message)
                             reminder.set_reminded()
