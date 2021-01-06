@@ -83,8 +83,11 @@ class ReminderBot(discord.Client):
             self.guild_manager = pickle.load(f)
 
     def save_guilds(self):
+        print('[INFO] saving guilds')
         with open(self.savefile, "wb") as f:
             pickle.dump(self.guild_manager, f)
+
+        print('[INFO] Done!')
 
     async def checkreminders(self):
         await self.wait_until_ready()
