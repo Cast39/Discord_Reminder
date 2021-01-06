@@ -231,6 +231,12 @@ class ReminderBot(discord.Client):
                     reminder.remove_subscriber(message.author.id)
                     self.save_guilds()
                     await message.add_reaction('✅')
+            elif command[0] == "check" and len(command) == 2:
+                user = self.get_user(int(command[1]))
+                if user is None:
+                    await message.channel.send("User not Found")
+                else:
+                    await message.channel.send(f'User Found: {user.name}')
 
         else:
             if guild.check_for_reminder_updates(message):
