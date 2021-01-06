@@ -121,6 +121,7 @@ class ReminderBot(discord.Client):
                 print()
 
             if reminder is not None:
+                self.save_guilds()
                 print()
 
             await asyncio.sleep(settings['reminder_check_interval'])
