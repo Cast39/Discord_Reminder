@@ -200,7 +200,9 @@ class ReminderBot(discord.Client):
                     response = f'**Subscribers of {command[1]}**\n'
 
                     for subscriber_id in reminder.subscribers:
-                        response += f'\n{self.get_user(subscriber_id).name}'
+                        user = self.get_user(subscriber_id)
+                        if user is not None:
+                            response += f'\n{user.name}'
 
                     await message.channel.send(response)
 
