@@ -97,9 +97,9 @@ class ReminderBot(discord.Client):
                     print(f'status of [{reminder_name}]: ', end="")
                     if reminder.is_it_time_to_remind():
                         if reminder.get_reminded():
-                            print('crying quiet :(')
+                            print(f'already reminded, waiting for \'{reminder.message}\'')
                         else:
-                            print('crying :\'(')
+                            print(f'reminding right now')
 
                             message = f'**{reminder_name}** IT\'S TIME'
                             if len(reminder.subscribers) != 0:
