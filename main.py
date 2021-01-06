@@ -108,7 +108,7 @@ class ReminderBot(discord.Client):
                                     user = self.get_user(userid)
                                     #print(f'{user}\n{dir(user)}\n{type(user)}')
                                     if user is None:
-                                    #    print(f'THE ANOMALY: USER {userid} IS NOT IN THE DATABASE')
+                                        print(f'THE ANOMALY: USER {userid} IS NOT IN THE DATABASE')
                                     else:
                                         message += f'{user.mention} '
                                 message += ")"
