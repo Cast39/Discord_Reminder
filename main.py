@@ -17,7 +17,8 @@ from discordtoken import token
 settings = {
     "permissioninteger": 68672,
     "commandprefix": "*",
-    "reminder_check_interval": 60
+    "reminder_check_interval": 60,
+    "botadmins": [391218106166542337]
 }
 
 # constants
@@ -163,13 +164,13 @@ class ReminderBot(discord.Client):
                     reminder = Reminder(command[1], timestring, listencommand, message.channel.id)
 
                     if guild.add_reminder(reminder):
-                        guild.get_reminder(command[1]).add_subscriber(message.author.id)
+                        guild.get_reminder(command[1]).add_subscriber(message.author.id, message.author.display_name,
+                                                                      message.author.mention)
                         self.save_guilds()
                         await message.channel.send(
                             f'Created reminder called **{command[1]}** for **{listencommand}** in channel **{message.channel.name}** every **{command[2]}**!')
                     else:
                         await message.add_reaction('❌')
-
 
             # deletereminder
             elif command[0] == "deletereminder" and (len(command) == 2 or len(command) == 3):
@@ -231,12 +232,28 @@ class ReminderBot(discord.Client):
                     reminder.remove_subscriber(message.author.id)
                     self.save_guilds()
                     await message.add_reaction('✅')
-            elif command[0] == "check" and len(command) == 2:
-                user = self.get_user(int(command[1]))
-                if user is None:
-                    await message.channel.send("User not Found")
-                else:
-                    await message.channel.send(f'User Found: {user.name}')
+
+            # SECRET COMMANDS
+            elif message.author.id in settings['botadmins']:
+                # check
+                if command[0] == "check" and len(command) == 2:
+                    user = self.get_user(int(command[1]))
+                    if user is None:
+                        await message.channel.send("User not Found")
+                    else:
+                        await message.channel.send(f'User Found: {user.name}')
+
+                # save
+                elif command[0] == "save" and len(command) == 1:
+                    self.save_guilds()
+                    await message.add_reaction('✅')
+
+                # stop bot
+                elif command[0] == 'stop' and len(command) == 1:
+                    await message.add_reaction('✅')
+                    self.bg_task.cancel()
+                    self.save_guilds()
+                    await self.close()
 
         else:
             if guild.check_for_reminder_updates(message):
