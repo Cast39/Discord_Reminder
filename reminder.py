@@ -29,12 +29,12 @@ class Reminder:
         self.channelid = channelid
 
         self.nexttime = time.time() + self.interval
-        self.subscribers = []
+        self.subscribers = {}
         self.is_reminded = False
 
-    def add_subscriber(self, user_id):
+    def add_subscriber(self, user_id, display_name, mention_tag):
         if user_id not in self.subscribers:
-            self.subscribers.append(user_id)
+            self.subscribers[user_id] = [display_name, mention_tag]
 
     def remove_subscriber(self, user_id):
         if user_id in self.subscribers:

@@ -111,12 +111,9 @@ class ReminderBot(discord.Client):
                             if len(reminder.subscribers) != 0:
                                 message += " ("
                                 for userid in reminder.subscribers:
-                                    user = self.get_user(userid)
-                                    # print(f'{user}\n{dir(user)}\n{type(user)}')
-                                    if user is None:
-                                        print(f'THE ANOMALY: USER {userid} IS NOT IN THE DATABASE')
-                                    else:
-                                        message += f'{user.mention} '
+                                    # if user is None:
+                                    #    print(f'THE ANOMALY: USER {reminder.subscribers[userid]} IS NOT IN THE DATABASE')
+                                    message += f'{reminder.subscribers[userid][1]} '
                                 message += ")"
                             await self.get_channel(reminder.channelid).send(message)
                             reminder.set_reminded()
@@ -205,13 +202,13 @@ class ReminderBot(discord.Client):
                     await message.channel.send(f'invalid name {command[1]}')
                 else:
                     response = f'**Subscribers of {command[1]}**\n'
-
-                    for subscriber_id in reminder.subscribers:
-                        user = self.get_user(subscriber_id)
-                        if user is None:
-                            print(f'THE ANOMALY: USER {subscriber_id} IS NOT IN THE DATABASE')
-                        else:
-                            response += f'\n{user.name}'
+                    if len(reminder.subscribers) == 0:
+                        response += "no subscribers yet"
+                    else:
+                        for subscriber_id in reminder.subscribers:
+                            # if user is None:
+                            #    print(f'THE ANOMALY: USER {reminder.subscribers[subscriber_id]} IS NOT IN THE DATABASE')
+                            response += f'\n{reminder.subscribers[subscriber_id][0]}'
 
                     await message.channel.send(response)
 
@@ -222,7 +219,7 @@ class ReminderBot(discord.Client):
                 if reminder is None or reminder.is_subscriber(message.author.id):
                     await message.add_reaction('❌')
                 else:
-                    reminder.add_subscriber(message.author.id)
+                    reminder.add_subscriber(message.author.id, message.author.display_name, message.author.mention)
                     self.save_guilds()
                     await message.add_reaction('✅')
 
