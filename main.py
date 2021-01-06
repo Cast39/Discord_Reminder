@@ -74,7 +74,6 @@ class ReminderBot(discord.Client):
                 return
 
         self.timepattern = re.compile("\\d+[mMhHsSdDtT]")
-        self.guild_manager = Guild_Manager()
 
         self.bg_task = self.loop.create_task(self.checkreminders())
 
