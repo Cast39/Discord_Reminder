@@ -49,10 +49,27 @@ you can add *publish* at the end to inform all users who followed this reminder 
 
 
 class ReminderBot(discord.Client):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, savefile=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.savefile = "reminderbot.save"
+
+        if savefile is None:
+            self.savefile = "reminderbot.save"
+        else:
+            self.savefile = savefile
+        try:
+            self.load_save()
+
+        except:
+            print("Couldn't find a previous save. Creating a new instead")
+
+            self.guild_manager = Guild_Manager()
+            try:
+                self.save_guilds()
+            except:
+                print("Error! Could not create a savefile")
+                self.logout()
+                return
 
         self.timepattern = re.compile("\\d+[mMhHsSdDtT]")
         self.guild_manager = Guild_Manager()
@@ -66,22 +83,6 @@ class ReminderBot(discord.Client):
     def save_guilds(self):
         with open(self.savefile, "wb") as f:
             pickle.dump(self.guild_manager, f)
-
-    def setup(self, savefile=None):
-        if savefile is not None:
-            self.savefile = savefile
-        try:
-            self.load_save()
-
-        except:
-            print("Couldn't find a previous save. Creating a new instead")
-
-            self.guild_manager = Guild_Manager()
-            try:
-                self.save_guilds()
-            except:
-                print("Error! Could not create a savefile")
-                return
 
     async def checkreminders(self):
         await self.wait_until_ready()
@@ -248,5 +249,4 @@ class ReminderBot(discord.Client):
 
 reminderbot = ReminderBot()
 
-reminderbot.setup()
 reminderbot.run(token)
