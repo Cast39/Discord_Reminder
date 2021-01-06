@@ -20,7 +20,6 @@ settings = {
     "reminder_check_interval": 15
 }
 
-
 # constants
 helpmessage = f'**How to use me:**\n\
 \n\
@@ -52,13 +51,16 @@ class ReminderBot(discord.Client):
     def __init__(self, savefile=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-
         if savefile is None:
             self.savefile = "reminderbot.save"
         else:
             self.savefile = savefile
+
+        print(f'using savefile \'{self.savefile}\'')
         try:
+            print('loading Save')
             self.load_save()
+            print('Done!')
 
         except:
             print("Couldn't find a previous save. Creating a new instead")
@@ -107,7 +109,7 @@ class ReminderBot(discord.Client):
                                 message += " ("
                                 for userid in reminder.subscribers:
                                     user = self.get_user(userid)
-                                    #print(f'{user}\n{dir(user)}\n{type(user)}')
+                                    # print(f'{user}\n{dir(user)}\n{type(user)}')
                                     if user is None:
                                         print(f'THE ANOMALY: USER {userid} IS NOT IN THE DATABASE')
                                     else:
