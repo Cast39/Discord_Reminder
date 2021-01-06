@@ -38,7 +38,7 @@ class Reminder:
 
     def remove_subscriber(self, user_id):
         if user_id in self.subscribers:
-            self.subscribers.pop(self.subscribers.index(user_id))
+            self.subscribers.pop(user_id)
 
     def is_subscriber(self, user_id):
         return user_id in self.subscribers

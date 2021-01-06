@@ -203,7 +203,7 @@ class ReminderBot(discord.Client):
                 else:
                     response = f'**Subscribers of {command[1]}**\n'
                     if len(reminder.subscribers) == 0:
-                        response += "no subscribers yet"
+                        response += "\nno subscribers yet"
                     else:
                         for subscriber_id in reminder.subscribers:
                             # if user is None:
