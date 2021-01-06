@@ -17,7 +17,7 @@ from discordtoken import token
 settings = {
     "permissioninteger": 68672,
     "commandprefix": "*",
-    "reminder_check_interval": 15
+    "reminder_check_interval": 60
 }
 
 # constants
