@@ -264,7 +264,7 @@ class ReminderBot(discord.Client):
         self.guild_manager.add_guild(guild.id)
         self.save_guilds()
 
-    async def on_guild_remove(self, guild):
+    async def on_guild_unavailable(self, guild):
         print("Oh no...")
         self.guild_manager.remove_guild(guild.id)
         self.save_guilds()
