@@ -97,7 +97,8 @@ class ReminderBot(discord.Client):
             reminder = None
             for guild_id in self.guild_manager.guilds:
                 guild = self.guild_manager.guilds[guild_id]
-                print(f'Checking Reminder for Guild [{self.get_guild(guild.guildid).name}]')
+                name = self.get_guild(guild.guildid).name
+                print(f'Checking Reminder for Guild [{name}]')
                 for reminder_name in guild.reminders:
                     reminder = guild.get_reminder(reminder_name)
                     print(f'status of [{reminder_name}]: ', end="")
