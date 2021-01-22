@@ -100,7 +100,7 @@ class ReminderBot(discord.Client):
                 try:
                     print(f'Checking Reminders for Guild [{self.get_guild(guild.guildid).name}]')
                 except:
-                    print(f'Guild was not found, skipping Guild {guild_id}')
+                    print(f'Guild was not found, skipping Guild {guild_id}\n')
                     continue
 
                 for reminder_name in guild.reminders:
